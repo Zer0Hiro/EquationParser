@@ -4,17 +4,19 @@
 #include<stdlib.h>
 #include<math.h>
 #include<string.h>
+#include "stack.h"
+
 #define T_NUMBER 0
 #define T_OPERATOR 1
 #define T_BRACKET 2
 #define T_VARIABLE 3
 #define T_EQUALITY 4
 
-typedef struct token
+/*typedef struct token
 {
     int value;
     int type; // 0 - number , 1 - opertaion, 2 - brackets
-}token;
+}token;*/ //Defined in stack.h
 
 typedef struct point
 {
@@ -71,8 +73,35 @@ void printScreen(char screen[][100], int length, int width)
     }
 }
 
-int isPointOnShape(token* tokens, int size, point p)
-{
+int convertToPolish(token* tokens, int size, point p)
+{//Takes coords of point p and evaluates using the tokens calculated, if true ret 1 else 0
+    //Impelemts Shunting yard algo with reverse polish notation
+    tokenStack opstack;
+    initialize_stack(&opstack);
+    tokenNode queue;
+    token temp;
+    int i;
+    for(i = 0; i < size; i++)
+    {
+        switch(tokens[i].type)
+        {
+            case T_NUMBER:
+                enqueue(&queue, tokens[i]);
+                break;
+            case T_OPERATOR:
+                if(peek(&opstack, &temp) == NOT_OK)
+                {
+                    push(&opstack, tokens[i]);
+                    break;
+                }
+                else
+                {
+                    
+                }
+            
+        }
+        
+    }
     
 }
 
