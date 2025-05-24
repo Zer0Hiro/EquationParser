@@ -38,18 +38,63 @@ Tboolean peek(tokenStack *PStack, token* token)
     }
 }
 
-
-
-
-void enqueue(tokenNode *PNode, token token)
+void initialize_queue(tokenQueue* queue)
 {
-    tokenNode temp = {token, PNode};
-    PNode = &temp;
+    queue->head = queue->tail = NULL;
+    queue->size = 0;
 }
 
-Tboolean dequeue(tokenNode *PNode, token* token)
+void enqueue(tokenQueue* queue,token token)
 {
-    if(PNode == NULL) return NOT_OK;
-    while(PNode->next != NULL) PNode = PNode->next;
-    *token = PNode->token;
+    if(queue->head == NULL)
+    {
+        tokenNode* temp = (tokenNode*)malloc(sizeof(tokenNode));
+        temp->next = NULL;
+        temp->token = token;
+        queue->tail = queue->head = temp;
+        queue->size++;
+    }
+    else
+    {
+        tokenNode* temp = (tokenNode*)malloc(sizeof(tokenNode));
+        temp->next = NULL;
+        temp->token = token;
+        queue->tail->next = temp;
+        queue->tail = temp;
+        queue->size++;
+    }
+    
+}
+
+Tboolean dequeue(tokenQueue* queue,token *token)
+{  
+    if(queue->head == NULL) return NOT_OK;
+    *token = queue->head->token;
+    queue->head = queue->head->next;
+    queue->size--;
+    return OK;
+}
+
+void print_queue(tokenQueue* queue)
+{
+    tokenNode* temp = queue->head;
+    int size = queue->size;
+    while(size > 0)
+    {
+        printf("Type: %d, Value: %d\n" , temp->token.type, temp->token.value);
+        temp = temp->next;
+        size--;
+    }
+}
+
+
+void free_queue(tokenQueue* queue)
+{
+    tokenNode* temp;
+    while(queue->head != NULL)
+    {
+        temp = queue->head;
+        queue->head = queue->head->next;
+        free(temp);
+    }
 }

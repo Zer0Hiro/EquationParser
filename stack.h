@@ -21,17 +21,24 @@ typedef struct
     int top;
 }tokenStack;
 
-typedef struct
+typedef struct tokenNode
 {
     token token;
-    tokenNode* next;
+    struct tokenNode* next;
 }tokenNode;
 
+typedef struct tokenQueue
+{
+    tokenNode *head, *tail;
+    int size;
+}tokenQueue;
 
-void initialize_queue(tokenNode *PNode);
-Tboolean enqueue(tokenNode *PNode, token token);
-Tboolean dequeue(tokenNode *PNode, token* token);
 
+void initialize_queue(tokenQueue*);
+void enqueue(tokenQueue*,token token);
+Tboolean dequeue(tokenQueue* queue,token *token);
+void print_queue(tokenQueue* queue);
+void free_queue(tokenQueue* queue);
 
 void initialize_stack (tokenStack *Pstack);
 Tboolean push (tokenStack *Pstack, token item);
