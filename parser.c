@@ -16,9 +16,9 @@
 
 typedef struct point
 {
-    float x;
-    float y;
-    float z;
+    double x;
+    double y;
+    double z;
 }point;
 
 void printScreen(char screen[][100], int length, int width);
@@ -26,12 +26,11 @@ void chooseChar(char* p, float dist);
 int parseRule(char* rule, token** tokens);
 void printTokens(token* tokens, int size);
 void convertToPolish(tokenQueue* queue, token* tokens, int size);
-int Precedence(token *t);
-int evalPolish(tokenQueue* queue, point p);
+double evalPolish(tokenQueue* queue, point p);
 
 int main()
 {
-    char* str = " x^2 + y^2 + z^2 <= 10";
+    char* str = " x^2 + y^2 + z^2";
     token* tokens;
     int size = parseRule(str, &tokens);
     printTokens(tokens, size);
@@ -43,9 +42,9 @@ int main()
 
     printf("\n\n");
     free(tokens);
-    point p = {1 , -2 , 0};
+    point p = {1.3 , -2.4 , 0};//TODO BUG
     int res = evalPolish(&queue, p);
-    printf("%d", res);
+    printf("%g", res);
     
     Sleep(100000);
     return 0;
@@ -59,17 +58,19 @@ void printTokens(token* tokens, int size)
         switch(tokens[i].type)
         {
             case T_NUMBER:
-                printf("Type: 1, Value: %d\n" , tokens[i].value);
+                printf("Type: 1, Value: %g\n" , tokens[i].value.num);
                 break;
-            case T_EQUALITY: case T_OPERATOR: case T_VARIABLE: case T_BRACKET:
-                printf("Type: %d, Value: %c\n" , tokens[i].type, tokens[i].value);
+            case T_OPERATOR:
+                printf("Type: %d, Value: %c\n" , tokens[i].type, tokens[i].value.op->symbol);
                 break;
-
+            case T_VARIABLE:
+                printf("Type: %d, Value: %c\n" , tokens[i].type, tokens[i].value.var);
+                break;
         }
     }
 }
 
-void chooseChar(char* p, float dist)
+/*void chooseChar(char* p, float dist)
 {
     int num = 0;
     char* map = "@$()!&*l>";
@@ -79,9 +80,9 @@ void chooseChar(char* p, float dist)
         return;
     }
     *p = map[abs((int)dist*20)];
-}
+}*/
 
-void printScreen(char screen[][100], int length, int width)
+/*void printScreen(char screen[][100], int length, int width)
 {
     printf("\e[1;1H\e[2J");
     int i, j;
@@ -93,7 +94,7 @@ void printScreen(char screen[][100], int length, int width)
         }
         printf("\n");
     }
-}
+}*/
 
 //Impelemts Shunting yard algo with reverse polish notation
 void convertToPolish(tokenQueue* queue, token* tokens, int size)
@@ -107,37 +108,18 @@ void convertToPolish(tokenQueue* queue, token* tokens, int size)
     {
         switch(tokens[i].type)
         {
-            case T_NUMBER:
+            case T_NUMBER: case T_VARIABLE:
                 enqueue(queue, tokens[i]);
                 break;
-            case T_VARIABLE:
-                enqueue(queue, tokens[i]);
-                break;
-            case T_OPERATOR: case T_EQUALITY:
-                if(peek(&opstack, &temp) == NOT_OK && temp.value != '(')
-                {
-                    push(&opstack, tokens[i]);
-                    break;
-                }
-                else
-                {
-                    while(peek(&opstack,&temp) == OK && Precedence(&temp) > Precedence(&(tokens[i])) && temp.value != '(')
-                    {
-                        pop(&opstack,&temp);
-                        enqueue(queue, temp);
-                    }
-                    push(&opstack,tokens[i]);
-                    break;
-                }
-            case T_BRACKET:
-                if(tokens[i].value == '(')
+            case T_OPERATOR:
+                if(tokens[i].value.op->symbol == '(')
                 {
                     push(&opstack,tokens[i]);
                     break;
                 }
-                if(tokens[i].value == ')')
+                if(tokens[i].value.op->symbol == ')')
                 {
-                    while(peek(&opstack,&temp) == OK && temp.value != '(')
+                    while(peek(&opstack,&temp) == OK && temp.value.op->symbol != '(')
                     {
                         pop(&opstack,&temp);
                         enqueue(queue,temp);
@@ -145,7 +127,21 @@ void convertToPolish(tokenQueue* queue, token* tokens, int size)
                     pop(&opstack,&temp);//Throw "Open bracket" token
                     break;
                 }
-            
+                else if(peek(&opstack, &temp) == NOT_OK)
+                {
+                    push(&opstack, tokens[i]);
+                    break;
+                }
+                else
+                {
+                    while(peek(&opstack,&temp) == OK && temp.value.op->precedence > tokens[i].value.op->precedence && temp.value.op->symbol != '(')
+                    {
+                        pop(&opstack,&temp);
+                        enqueue(queue, temp);
+                    }
+                    push(&opstack,tokens[i]);
+                    break;
+                } 
         }
         
     }
@@ -156,22 +152,6 @@ void convertToPolish(tokenQueue* queue, token* tokens, int size)
     free_stack(&opstack);
 }
 
-int Precedence(token *t)
-{
-    switch(t->value)
-    {
-        case '>': case '=': case '<': case '.':
-            return 0;
-        case '+':
-            return 2;
-        case '-':
-            return 2;
-        case '*':
-            return 3;
-        case '^':
-            return 4;
-    }
-}
 
 int parseRule(char* rule, token** res)
 {//Takes equation in str and tokenizes to numbers, operators, brackets, order signs, variables
@@ -182,65 +162,53 @@ int parseRule(char* rule, token** res)
     {
         while(*rule == ' ' || *rule == ',') rule++;
         if(isdigit(*rule))
-        {
+        {//TODO PARSE DECIMALS instead
             tokens[index_t].type = T_NUMBER;
-            tokens[index_t].value = 0;
+            tokens[index_t].value.num = 0;
             do
             {
-                tokens[index_t].value = tokens[index_t].value * 10 + (*rule - '0');
+                tokens[index_t].value.num = tokens[index_t].value.num * 10 + (*rule - '0');
                 rule++;
             } while (isdigit(*rule));
         }
-        else if(strchr("+\\-*^",*rule) != NULL)
+        else if(strchr("+\\-*^()=",*rule) != NULL)
         {
             tokens[index_t].type = T_OPERATOR;
-            tokens[index_t].value = *rule;
-            rule++;
-        }
-        else if(strchr("()",*rule) != NULL)
-        {
-            tokens[index_t].type = T_BRACKET;
-            tokens[index_t].value = *rule;
+            tokens[index_t].value.op = getop(*rule);
             rule++;
         }
         else if(strchr("xyz",*rule) != NULL)
         {
             tokens[index_t].type = T_VARIABLE;
-            tokens[index_t].value = *rule;
-            rule++;
-        }
-        else if(strchr("=",*rule) != NULL)
-        {
-            tokens[index_t].type = T_EQUALITY;
-            tokens[index_t].value = *rule;
+            tokens[index_t].value.var = *rule;
             rule++;
         }
         else if(strchr("><",*rule) != NULL)
         {
             if(*rule + 1 == '=')
             {
-                tokens[index_t].type = T_EQUALITY;
-                tokens[index_t].value = '.';
+                tokens[index_t].type = T_OPERATOR;
+                tokens[index_t].value.op = getop('.');
                 rule += 2;
             }
             else
             {
-                tokens[index_t].type = T_EQUALITY;
-                tokens[index_t].value = *rule;
+                tokens[index_t].type = T_OPERATOR;
+                tokens[index_t].value.op = getop(*rule);
                 rule++;
             }
             
         }
         else if(strstr(rule, "max") == &(*rule))
-        {
+        {//TODO THINK OF SOMETHING BETTER
             tokens[index_t].type = T_OPERATOR;
-            tokens[index_t].value = 'M';
+            tokens[index_t].value.op = getop('M');
             rule = rule + 3;
         }
         else if(strstr(rule, "abs") == &(*rule))
         {
             tokens[index_t].type = T_OPERATOR;
-            tokens[index_t].value = 'a';
+            tokens[index_t].value.op = getop('a');
             rule = rule + 3;
         }
         temp = (token*)realloc(tokens, (index_t + 2)*sizeof(token));
@@ -253,7 +221,7 @@ int parseRule(char* rule, token** res)
     return (index_t);
 }
 
-int evalPolish(tokenQueue* queue, point p)
+double evalPolish(tokenQueue* queue, point p)
 {
     tokenStack numstack;
     initialize_stack(&numstack);
@@ -267,7 +235,7 @@ int evalPolish(tokenQueue* queue, point p)
                 push(&numstack, head->_token);
                 break;
             case(T_VARIABLE):
-                switch(head->_token.value)
+                switch(head->_token.value.var)
                 {
                     case 'x':
                         token x = {(int)p.x , T_NUMBER};
@@ -283,20 +251,20 @@ int evalPolish(tokenQueue* queue, point p)
                         break;    
                 }
                 break;
-            case(T_OPERATOR): case(T_EQUALITY):
+            case(T_OPERATOR):
                 token L,R,result;
-                if(head->_token.value != 'a')//NOT UNARY
+                if(!(head->_token.value.op->isUnary))//NOT UNARY
                 {
                     pop(&numstack, &L);
                     pop(&numstack, &R);
-                    result.value = operate(R.value , L.value, (char)head->_token.value);
+                    result.value.num = head->_token.value.op->evalfunc(L.value.num, R.value.num);
                     result.type = T_NUMBER;
                     push(&numstack,result);
                 }
                 else //YES UNARY
                 {
                     pop(&numstack, &L);
-                    result.value = operate(L.value , 0, (char)head->_token.value);
+                    result.value.num = head->_token.value.op->evalfunc(L.value.num, 0);
                     result.type = T_NUMBER;
                     push(&numstack,result);
                 }
@@ -306,6 +274,6 @@ int evalPolish(tokenQueue* queue, point p)
         }
         head = head->next;
     }
-    return numstack.tokenTop->_token.value;
+    return numstack.tokenTop->_token.value.num;
 
 }

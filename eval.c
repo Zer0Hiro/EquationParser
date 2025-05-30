@@ -1,71 +1,73 @@
 #include "stack.h"
 #include "eval.h"
 
+operator ops[] =
+{  //sym, pre, assoc, unary, evalfunc
+    {'+', 2, LEFT, 0, evalplus},
+    {'*', 3, LEFT, 0, evalmult},
+    {'\\', 3, LEFT, 0, evaldiv},
+    {'^', 4, RIGHT, 0, evalpow},
+    {'-', 2, LEFT, 0, evalminus},
+    {'a', 1, RIGHT, 1, evalabs},
+    {'M', 1, RIGHT, 0, evalmax},
+    {'>', 0, LEFT, 0, evalls},
+    {'=', 0, LEFT, 0, evaleq},
+    {'.', 0, LEFT, 0, evalleq}, // less than equal
+    {'(', 0, NONE, 0, NULL},
+    {')', 0, NONE, 0, NULL},
+};
 
-int evalplus(int a, int b)
+
+double evalplus(double a, double b)
 {
     return a + b;
 }
-int evalminus(int a, int b)
+double evalminus(double a, double b)
 {
     return a - b;
 }
-int evalmult(int a, int b)
+double evalmult(double a, double b)
 {
     return a * b;
 }
-int evalpow(int a, int b)
+double evalpow(double a, double b)
 {
     return (double)pow(a , b);
 }
-int evaldiv(int a, int b)
+double evaldiv(double a, double b)
 {//TODO handle divbyzero
     return a/b;
 }
-int evaleq(int a, int b)
+double evaleq(double a, double b)
 {
     return a == b;
 }
-int evalls(int a, int b)
+double evalls(double a, double b)
 {
     return a < b;
 }
-int evalleq(int a, int b)
+double evalleq(double a, double b)
 {
     return a <= b;
 }
-int evalabs(int a, int b)
+double evalabs(double a, double b)
 {
     return fabs(a);
 }
-int evalmax(int a, int b)
+double evalmax(double a, double b)
 {
     return a > b ? a : b;
 }
 
-int operate(int a, int b, char c)
+operator* getop(char c)
 {
-    switch(c)
+    int i;
+    for(i = 0; i < (sizeof(ops) / sizeof(operator)); i++)
     {
-        case '+':
-            return evalplus(a,b);
-        case '*':
-            return evalmult(a,b);
-        case '\\':
-            return evaldiv(a,b);
-        case '-':
-            return evalminus(a,b);
-        case '^':
-            return evalpow(a,b);
-        case '=':
-            return evaleq(a,b);
-        case '<':
-            return evalls(a,b);
-        case 'a':
-            return evalabs(a,0);
-        case 'M':
-            return evalmax(a,b);
-        case '.':
-            return evalleq(a,b);
+        if(ops[i].symbol == c)
+        {
+            return &(ops[i]);
+        }
     }
+    return NULL;
 }

@@ -98,12 +98,14 @@ void print_queue(tokenQueue* queue)
         switch(temp->_token.type)
         {
             case T_NUMBER:
-                printf("Type: 1, Value: %d\n" , temp->_token.value);
+                printf("Type: 1, Value: %g\n" , temp->_token.value);
                 break;
-            case T_EQUALITY: case T_OPERATOR: case T_VARIABLE:
-                printf("Type: %d, Value: %c\n" , temp->_token.type, temp->_token.value);
+            case T_OPERATOR: 
+                printf("Type: %d, Value: %c\n" , temp->_token.type, temp->_token.value.op->symbol);
                 break;
-
+            case T_VARIABLE:
+                printf("Type: %d, Value: %c\n" , temp->_token.type, temp->_token.value.var);
+                break;
         }
         temp = temp->next;
         size--;

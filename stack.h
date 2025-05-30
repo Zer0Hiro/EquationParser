@@ -4,17 +4,27 @@
 #include<conio.h>
 #include<stdlib.h>
 #include <ctype.h>
+#include "eval.h"
 
-#define T_NUMBER 0
-#define T_OPERATOR 1
-#define T_BRACKET 2
-#define T_VARIABLE 3
-#define T_EQUALITY 4
+
+
+
+typedef enum {
+    T_NUMBER,
+    T_OPERATOR,
+    T_VARIABLE,
+} T_TYPE;
 
 typedef struct token
 {
-    int value;
-    int type; // 0 - number , 1 - opertaion, 2 - brackets
+    T_TYPE type;
+    union value
+    {
+        double num;
+        operator* op;
+        char var;
+    }value;
+
 }token;
 
 typedef struct tokenNode

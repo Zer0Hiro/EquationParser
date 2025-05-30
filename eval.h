@@ -17,36 +17,24 @@ typedef struct op
     char precedence;
     ASSOC assoc;
     char isUnary;
-    float (*evalfunc)(float, float);
+    double (*evalfunc)(double, double);
 }operator;
 
-int evalplus(int a, int b);
-int evalminus(int a, int b);
-int evalmult(int a, int b);
-int evalpow(int a, int b);
-int evaldiv(int a, int b);
-int evaleq(int a, int b);
-int evalls(int a, int b);
-int evalleq(int a, int b);
-int evalabs(int a, int b);
-int evalmax(int a, int b);
+double evalplus(double a, double b);
+double evalminus(double a, double b);
+double evalmult(double a, double b);
+double evalpow(double a, double b);
+double evaldiv(double a, double b);
+double evaleq(double a, double b);
+double evalls(double a, double b);
+double evalleq(double a, double b);
+double evalabs(double a, double b);
+double evalmax(double a, double b);
 
 
-/*operator ops[] =
-{  //sym, pre, assoc, unary, evanfunc
-    {'+', 2, LEFT, 0, evalplus},
-    {'*', 3, LEFT, 0, evalmult},
-    {'\\', 3, LEFT, 0, evaldiv},
-    {'^', 4, RIGHT, 0, evalpow},
-    {'-', 2, LEFT, 0, evalminus},
-    {'a', 1, RIGHT, 1, evalabs},
-    {'M', 1, RIGHT, 0, evalmax},
-    {'>', 0, LEFT, 0, evalls},
-    {'=', 0, LEFT, 0, evaleq},
-    {'.', 0, LEFT, 0, evalleq}, // less than equal
-};*/
 
 
-int operate(int a, int b, char c);
+
+operator* getop(char c);
 
 #endif
