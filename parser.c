@@ -5,14 +5,10 @@
 #include<math.h>
 #include<string.h>
 #include<windows.h>
+#include<time.h>
 #include "stack.h"
 #include "eval.h"
 
-/*typedef struct token
-{
-    int value;
-    int type; // 0 - number , 1 - opertaion, 2 - brackets
-}token;*/ //Defined in stack.h
 
 typedef struct point
 {
@@ -30,7 +26,8 @@ double evalPolish(tokenQueue* queue, point p);
 
 int main()
 {
-    char* str = " x^2 + y^2 + z^2";
+
+    char* str = "x^2 + y^2 + z^2 <= 100";
     token* tokens;
     int size = parseRule(str, &tokens);
     printTokens(tokens, size);
@@ -42,10 +39,11 @@ int main()
 
     printf("\n\n");
     free(tokens);
-    point p = {1.3 , -2.4 , 0};//TODO BUG
-    int res = evalPolish(&queue, p);
-    printf("%g", res);
     
+    point p = {1 , 2 , 0};
+    double res = evalPolish(&queue, p);
+    printf("%g\n", res);
+
     Sleep(100000);
     return 0;
 }
@@ -70,32 +68,6 @@ void printTokens(token* tokens, int size)
     }
 }
 
-/*void chooseChar(char* p, float dist)
-{
-    int num = 0;
-    char* map = "@$()!&*l>";
-    if(2*dist > 1)
-    {
-        *p = ' ';
-        return;
-    }
-    *p = map[abs((int)dist*20)];
-}*/
-
-/*void printScreen(char screen[][100], int length, int width)
-{
-    printf("\e[1;1H\e[2J");
-    int i, j;
-    for(i = 0; i < length; i++)
-    {
-        for(j = 0; j < width; j++)
-        {
-            printf("%c", screen[i][j]);
-        }
-        printf("\n");
-    }
-}*/
-
 //Impelemts Shunting yard algo with reverse polish notation
 void convertToPolish(tokenQueue* queue, token* tokens, int size)
 {
@@ -112,12 +84,13 @@ void convertToPolish(tokenQueue* queue, token* tokens, int size)
                 enqueue(queue, tokens[i]);
                 break;
             case T_OPERATOR:
-                if(tokens[i].value.op->symbol == '(')
+                // IF operator stack is empty, just push the operator OR IF token is '(', just push it
+                if(peek(&opstack, &temp) == NOT_OK || tokens[i].value.op->symbol == '(')
                 {
-                    push(&opstack,tokens[i]);
-                    break;
+                    push(&opstack, tokens[i]);
                 }
-                if(tokens[i].value.op->symbol == ')')
+                // IF token is ')', pop all operators to the output queue and throw the '('
+                else if(tokens[i].value.op->symbol == ')')
                 {
                     while(peek(&opstack,&temp) == OK && temp.value.op->symbol != '(')
                     {
@@ -125,26 +98,29 @@ void convertToPolish(tokenQueue* queue, token* tokens, int size)
                         enqueue(queue,temp);
                     }
                     pop(&opstack,&temp);//Throw "Open bracket" token
-                    break;
+                    //IF first operator after brackets is unary, push it to the queue
+                    if(peek(&opstack, &temp) == OK && temp.value.op->isUnary)
+                    {
+                        pop(&opstack,&temp);
+                        enqueue(queue,temp);
+                    }
                 }
-                else if(peek(&opstack, &temp) == NOT_OK)
-                {
-                    push(&opstack, tokens[i]);
-                    break;
-                }
+                // for all other operators w\o any special case
                 else
                 {
+                    // WHILE the next operator is of lower precedence, pop all non '(' operators to output queue
                     while(peek(&opstack,&temp) == OK && temp.value.op->precedence > tokens[i].value.op->precedence && temp.value.op->symbol != '(')
                     {
                         pop(&opstack,&temp);
                         enqueue(queue, temp);
                     }
                     push(&opstack,tokens[i]);
-                    break;
                 } 
+                break;
         }
         
     }
+    // after going through the whole token array; just pop all operators to the output queue
     while(pop(&opstack, &temp) != NOT_OK)
     {
         enqueue(queue, temp);
@@ -152,15 +128,23 @@ void convertToPolish(tokenQueue* queue, token* tokens, int size)
     free_stack(&opstack);
 }
 
-
+//Takes equation in str and tokenizes to numbers, operators, brackets, order signs, variables
 int parseRule(char* rule, token** res)
-{//Takes equation in str and tokenizes to numbers, operators, brackets, order signs, variables
-    token* tokens = (token*)malloc(sizeof(token));
-    token* temp;
+{
+    token* tokens = (token*)malloc(sizeof(token)), *temp;
     int index_t = 0;
     while(*rule != '\0')
     {
-        while(*rule == ' ' || *rule == ',') rule++;
+        temp = (token*)realloc(tokens, (index_t + 1)*sizeof(token));
+        if(temp == NULL)
+        {
+            free(tokens);
+            printf("ERROR allocating memory");
+            exit(1);
+        }
+        tokens = temp;
+        while(*rule == ' ' || *rule == ',') rule++; //Ignores whitespace and commas
+
         if(isdigit(*rule))
         {//TODO PARSE DECIMALS instead
             tokens[index_t].type = T_NUMBER;
@@ -171,22 +155,25 @@ int parseRule(char* rule, token** res)
                 rule++;
             } while (isdigit(*rule));
         }
+        //if the char is a single-char operator
         else if(strchr("+\\-*^()=",*rule) != NULL)
         {
             tokens[index_t].type = T_OPERATOR;
             tokens[index_t].value.op = getop(*rule);
             rule++;
         }
+        //if the char is a variable
         else if(strchr("xyz",*rule) != NULL)
         {
             tokens[index_t].type = T_VARIABLE;
             tokens[index_t].value.var = *rule;
             rule++;
         }
+        //if the char is < , >
         else if(strchr("><",*rule) != NULL)
         {
             if(*rule + 1 == '=')
-            {
+            {//if the operator is <= or >=
                 tokens[index_t].type = T_OPERATOR;
                 tokens[index_t].value.op = getop('.');
                 rule += 2;
@@ -199,6 +186,7 @@ int parseRule(char* rule, token** res)
             }
             
         }
+        //if the char is a multi-char operator (CURRENTLY ONLY: abs, max)
         else if(strstr(rule, "max") == &(*rule))
         {//TODO THINK OF SOMETHING BETTER
             tokens[index_t].type = T_OPERATOR;
@@ -211,42 +199,52 @@ int parseRule(char* rule, token** res)
             tokens[index_t].value.op = getop('a');
             rule = rule + 3;
         }
-        temp = (token*)realloc(tokens, (index_t + 2)*sizeof(token));
-        tokens = temp;
+        else
+        {//Edge case
+            printf("illegal char %c" , *rule);
+            exit(1);
+        }
         index_t++;
     }
     *res = tokens;
-    temp = (token*)realloc(tokens, (index_t + 1)*sizeof(token));
-    tokens = temp;
-    return (index_t);
+    return index_t;
 }
 
+//Takes Reverse polish equation and point p and evaluates the equation with respect to p's coords
 double evalPolish(tokenQueue* queue, point p)
-{
+{//Does not overwrite tokenQueue* queue; so can be reused
     tokenStack numstack;
     initialize_stack(&numstack);
-    tokenNode *head = queue->head, *tail = queue->tail;
+    tokenNode *head = queue->head;
     int size = queue->size;
     while(head != NULL)
     {
         switch(head->_token.type)
         {
+            //If the token is just a number; push it to the numstack
             case(T_NUMBER):
                 push(&numstack, head->_token);
                 break;
+            //If the token is a variable; convert it to num and push it to the numstack
             case(T_VARIABLE):
                 switch(head->_token.value.var)
                 {
                     case 'x':
-                        token x = {(int)p.x , T_NUMBER};
+                        token x;
+                        x.value.num = p.x;
+                        x.type = T_NUMBER;
                         push(&numstack, x);
                         break;
                     case 'y':
-                        token y = {(int)p.y , T_NUMBER};
+                        token y;
+                        y.value.num = p.y;
+                        y.type = T_NUMBER;
                         push(&numstack, y);
                         break;
                     case 'z':
-                        token z = {(int)p.z , T_NUMBER};
+                        token z;
+                        z.value.num = p.z;
+                        z.type = T_NUMBER;
                         push(&numstack, z);
                         break;    
                 }
@@ -255,8 +253,8 @@ double evalPolish(tokenQueue* queue, point p)
                 token L,R,result;
                 if(!(head->_token.value.op->isUnary))//NOT UNARY
                 {
-                    pop(&numstack, &L);
                     pop(&numstack, &R);
+                    pop(&numstack, &L);
                     result.value.num = head->_token.value.op->evalfunc(L.value.num, R.value.num);
                     result.type = T_NUMBER;
                     push(&numstack,result);
@@ -269,8 +267,6 @@ double evalPolish(tokenQueue* queue, point p)
                     push(&numstack,result);
                 }
                 break;
-                
-                
         }
         head = head->next;
     }

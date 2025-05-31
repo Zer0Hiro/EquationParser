@@ -1,6 +1,7 @@
 #include "stack.h"
 #include "eval.h"
 
+//Predefined operators
 operator ops[] =
 {  //sym, pre, assoc, unary, evalfunc
     {'+', 2, LEFT, 0, evalplus},
@@ -8,8 +9,8 @@ operator ops[] =
     {'\\', 3, LEFT, 0, evaldiv},
     {'^', 4, RIGHT, 0, evalpow},
     {'-', 2, LEFT, 0, evalminus},
-    {'a', 1, RIGHT, 1, evalabs},
-    {'M', 1, RIGHT, 0, evalmax},
+    {'a', 4, RIGHT, 1, evalabs},
+    {'M', 4, RIGHT, 0, evalmax},
     {'>', 0, LEFT, 0, evalls},
     {'=', 0, LEFT, 0, evaleq},
     {'.', 0, LEFT, 0, evalleq}, // less than equal
@@ -32,7 +33,7 @@ double evalmult(double a, double b)
 }
 double evalpow(double a, double b)
 {
-    return (double)pow(a , b);
+    return pow(a , b);
 }
 double evaldiv(double a, double b)
 {//TODO handle divbyzero
@@ -59,6 +60,7 @@ double evalmax(double a, double b)
     return a > b ? a : b;
 }
 
+//Gets char and returns pointer to operator with more info (Associativity direction, is unary, pointer to eval function)
 operator* getop(char c)
 {
     int i;

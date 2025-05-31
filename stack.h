@@ -17,14 +17,14 @@ typedef enum {
 
 typedef struct token
 {
-    T_TYPE type;
     union value
     {
-        double num;
-        operator* op;
-        char var;
+        double num; //T_NUMBER
+        operator* op; //T_OPERATOR
+        char var; //T_VARIABLE
     }value;
-
+    T_TYPE type;
+    
 }token;
 
 typedef struct tokenNode
