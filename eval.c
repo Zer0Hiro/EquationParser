@@ -6,7 +6,7 @@ operator ops[] =
 {  //sym, pre, assoc, unary, evalfunc
     {'+', 2, LEFT, 0, evalplus},
     {'*', 3, LEFT, 0, evalmult},
-    {'\\', 3, LEFT, 0, evaldiv},
+    {'/', 3, LEFT, 0, evaldiv},
     {'^', 4, RIGHT, 0, evalpow},
     {'-', 2, LEFT, 0, evalminus},
     {'a', 4, RIGHT, 1, evalabs},

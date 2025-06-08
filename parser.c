@@ -1,52 +1,28 @@
-#define _CRT_SECURE_NO_WARNINGS
-#include<stdio.h>
-#include<ctype.h>
-#include<stdlib.h>
-#include<math.h>
-#include<string.h>
-#include<windows.h>
-#include<time.h>
-#include "stack.h"
-#include "eval.h"
+#include "parser.h"
 
+// int main()
+// {
 
-typedef struct point
-{
-    double x;
-    double y;
-    double z;
-}point;
+//     char* str = "x^2 + y^2 + z^2 <= 100";
+//     token* tokens;
+//     int size = parseRule(str, &tokens);
+//     printTokens(tokens, size);
+//     tokenQueue queue;
+//     initialize_queue(&queue);
+//     convertToPolish(&queue, tokens, size);
+//     printf("\n\n");
+//     print_queue(&queue);
 
-void printScreen(char screen[][100], int length, int width);
-void chooseChar(char* p, float dist);
-int parseRule(char* rule, token** tokens);
-void printTokens(token* tokens, int size);
-void convertToPolish(tokenQueue* queue, token* tokens, int size);
-double evalPolish(tokenQueue* queue, point p);
-
-int main()
-{
-
-    char* str = "x^2 + y^2 + z^2 <= 100";
-    token* tokens;
-    int size = parseRule(str, &tokens);
-    printTokens(tokens, size);
-    tokenQueue queue;
-    initialize_queue(&queue);
-    convertToPolish(&queue, tokens, size);
-    printf("\n\n");
-    print_queue(&queue);
-
-    printf("\n\n");
-    free(tokens);
+//     printf("\n\n");
+//     free(tokens);
     
-    point p = {1 , 2 , 0};
-    double res = evalPolish(&queue, p);
-    printf("%g\n", res);
+//     point p = {1 , 2 , 0};
+//     double res = evalPolish(&queue, p);
+//     printf("%g\n", res);
 
-    Sleep(100000);
-    return 0;
-}
+//     Sleep(100000);
+//     return 0;
+// }
 
 void printTokens(token* tokens, int size)
 {
@@ -156,7 +132,7 @@ int parseRule(char* rule, token** res)
             } while (isdigit(*rule));
         }
         //if the char is a single-char operator
-        else if(strchr("+\\-*^()=",*rule) != NULL)
+        else if(strchr("+/-*^()=",*rule) != NULL)
         {
             tokens[index_t].type = T_OPERATOR;
             tokens[index_t].value.op = getop(*rule);
