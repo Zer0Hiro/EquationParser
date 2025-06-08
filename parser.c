@@ -1,27 +1,5 @@
 #include "parser.h"
 
-int main()
-{
-    char* str = "abs((x^0.5 + y^2 + z^2))^(1/2) <= 100";
-    token* tokens;
-    int size = parseRule(str, &tokens);
-    printTokens(tokens, size);
-    tokenQueue queue;
-    initialize_queue(&queue);
-    convertToPolish(&queue, tokens, size);
-    printf("\n\n");
-    print_queue(&queue);
-
-    printf("\n\n");
-    free(tokens);
-    
-    point p = {1 , 2 , 0};
-    double res = evalPolish(&queue, p);
-    printf("%g\n", res);
-
-    //Sleep(100000);
-    return 0;
-}
 
 void printTokens(token* tokens, int size)
 {
