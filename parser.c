@@ -1,28 +1,5 @@
 #include "parser.h"
 
-// int main()
-// {
-
-//     char* str = "x^2 + y^2 + z^2 <= 100";
-//     token* tokens;
-//     int size = parseRule(str, &tokens);
-//     printTokens(tokens, size);
-//     tokenQueue queue;
-//     initialize_queue(&queue);
-//     convertToPolish(&queue, tokens, size);
-//     printf("\n\n");
-//     print_queue(&queue);
-
-//     printf("\n\n");
-//     free(tokens);
-    
-//     point p = {1 , 2 , 0};
-//     double res = evalPolish(&queue, p);
-//     printf("%g\n", res);
-
-//     Sleep(100000);
-//     return 0;
-// }
 
 void printTokens(token* tokens, int size)
 {
@@ -108,7 +85,9 @@ void convertToPolish(tokenQueue* queue, token* tokens, int size)
 int parseRule(char* rule, token** res)
 {
     token* tokens = (token*)malloc(sizeof(token)), *temp;
-    int index_t = 0;
+    int index_t = 0, index_num = 0;
+    char temp_num[30];
+
     while(*rule != '\0')
     {
         temp = (token*)realloc(tokens, (index_t + 1)*sizeof(token));
@@ -121,15 +100,20 @@ int parseRule(char* rule, token** res)
         tokens = temp;
         while(*rule == ' ' || *rule == ',') rule++; //Ignores whitespace and commas
 
+        //If the char is a digit- must be part of a num so evaluates the decimal number
         if(isdigit(*rule))
-        {//TODO PARSE DECIMALS instead
-            tokens[index_t].type = T_NUMBER;
-            tokens[index_t].value.num = 0;
+        {
+            char* start_num = rule; //save start of num
             do
             {
-                tokens[index_t].value.num = tokens[index_t].value.num * 10 + (*rule - '0');
+                index_num++;
                 rule++;
-            } while (isdigit(*rule));
+            } while(isdigit(*rule) || *rule == '.'); //continue going through the string while chars represent a number
+            strncpy(temp_num, start_num, index_num); // copies only part of the string: the number
+            temp_num[index_num] = '\0'; // Null terminate the end
+            index_num = 0; //Reset for next num
+            tokens[index_t].type = T_NUMBER;
+            tokens[index_t].value.num = atof(temp_num);
         }
         //if the char is a single-char operator
         else if(strchr("+/-*^()=",*rule) != NULL)
@@ -172,7 +156,7 @@ int parseRule(char* rule, token** res)
         else if(strstr(rule, "abs") == &(*rule))
         {
             tokens[index_t].type = T_OPERATOR;
-            tokens[index_t].value.op = getop('a');
+            tokens[index_t].value.op = getop('|');
             rule = rule + 3;
         }
         else
@@ -192,7 +176,7 @@ double evalPolish(tokenQueue* queue, point p)
     tokenStack numstack;
     initialize_stack(&numstack);
     tokenNode *head = queue->head;
-    int size = queue->size;
+    int size = queue->size ,res;
     while(head != NULL)
     {
         switch(head->_token.type)
@@ -246,6 +230,8 @@ double evalPolish(tokenQueue* queue, point p)
         }
         head = head->next;
     }
-    return numstack.tokenTop->_token.value.num;
+    res = numstack.tokenTop->_token.value.num;
+    free_stack(&numstack);
+    return res;
 
 }
