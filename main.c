@@ -108,11 +108,12 @@ int main()
                 }
 
                 // Print Char
-                putchar(k % WIDTH ? buffer[k] : '\n');
+                putchar(buffer[k]);
             }
-            else
-                printf(k % WIDTH ? "\033[1C" : "\n"); // Move Cursor 1 time right
+            // else
+            //     printf(k % WIDTH ? "\033[1C" : "\n"); // Move Cursor 1 time right
         }
+        fflush(stdout);
 
         if (C == 1)
             C = 0;
