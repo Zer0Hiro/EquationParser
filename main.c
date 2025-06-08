@@ -1,5 +1,5 @@
 #include "parser.h"
-#define WIDTH 100
+#define WIDTH 140
 #define HEIGHT 40
 
 typedef struct rgb
@@ -17,6 +17,7 @@ char *str = "x^2 + y^2 <= z^2";
 
 // Buffers for output points
 char buffer[WIDTH * HEIGHT];
+char PrevBuffer[WIDTH * HEIGHT];
 // Coordinates of projection z-buffering
 float zbuffer[WIDTH * HEIGHT];
 // Buffer for color
@@ -87,16 +88,30 @@ int main()
         // Print all points
         for (k = 0; k < WIDTH * HEIGHT; k++)
         {
-            // Color swap
-            newcolor = (buffer[k] != ' ') ? 1 : 0;
-            if (newcolor != lastcolor)
+            if (buffer[k] != PrevBuffer[k])
             {
-                lastcolor = newcolor;
-                printf("\033[38;2;%d;%d;%dm", colorbuffer[k].r, colorbuffer[k].g, colorbuffer[k].b);
-            }
+                // Save symbols
+                PrevBuffer[k] = buffer[k];
 
-            // Print Char
-            putchar(k % WIDTH ? buffer[k] : '\n');
+                // Position check
+                int row = k / WIDTH;
+                int col = k % WIDTH;
+                // Move 1 forward
+                printf("\033[%d;%dH", row + 1, col + 1);
+
+                // Color swap
+                newcolor = (buffer[k] != ' ') ? 1 : 0;
+                if (newcolor != lastcolor)
+                {
+                    lastcolor = newcolor;
+                    printf("\033[38;2;%d;%d;%dm", colorbuffer[k].r, colorbuffer[k].g, colorbuffer[k].b);
+                }
+
+                // Print Char
+                putchar(k % WIDTH ? buffer[k] : '\n');
+            }
+            else
+                printf(k % WIDTH ? "\033[1C" : "\n"); // Move Cursor 1 time right
         }
 
         if (C == 1)
@@ -105,6 +120,7 @@ int main()
             B = 0;
         if (A == 1)
             A = 0;
+
         C += 0.05; // X rotation (roll)
         B += 0.05; // Y rotation (pitch)
         A += 0.05; // Z rotation (yaw)
