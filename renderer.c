@@ -89,10 +89,10 @@ void renderObject(int width, int height, char *buffer, RGB *colorbuffer, char* P
             // Save symbols
             PrevBuffer[k] = buffer[k];
 
-            // Position check
+            // Position check for jump
             row = k / width;
             col = k % width;
-            // Move 1 forward
+            // Jump and move 1 forward
             printf("\033[%d;%dH", row + 1, col + 1);
 
             // Color swap
