@@ -198,7 +198,7 @@ double evalPolish(tokenQueue* queue, point p)
     tokenStack numstack;
     initialize_stack(&numstack);
     tokenNode *head = queue->head;
-    int size = queue->size;
+    int size = queue->size ,res;
     while(head != NULL)
     {
         switch(head->_token.type)
@@ -252,6 +252,8 @@ double evalPolish(tokenQueue* queue, point p)
         }
         head = head->next;
     }
-    return numstack.tokenTop->_token.value.num;
+    res = numstack.tokenTop->_token.value.num;
+    free_stack(&numstack);
+    return res;
 
 }
