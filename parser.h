@@ -25,5 +25,6 @@ int parseRule(char* rule, token** tokens);
 void printTokens(token* tokens, int size);
 void convertToPolish(tokenQueue* queue, token* tokens, int size);
 double evalPolish(tokenQueue* queue, point p);
+tokenQueue init(char* str);
 
 #endif

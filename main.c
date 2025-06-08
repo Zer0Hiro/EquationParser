@@ -31,7 +31,8 @@ int screenpos;    // position of a point on the screen
 float ooz;        // z-buffer 1/z
 
 float x, y, z; // Point coords
-float A, B, C; // Angle
+float A, B, C; // Angles
+float deltaA, deltaB, deltaC; // delta of Angle
 
 void calculatePoint(int i, int j, int k, int sym, char *color);
 char map(float a);
@@ -42,17 +43,17 @@ int main()
     float i, j, g;
     int k;
     int lastcolor, newcolor;
-    int maxR = 0;
+    int row;
+    int col;
 
     system("cls");
 
-    token *tokens;
-    int size = parseRule(str, &tokens);
-    tokenQueue queue;
-    initialize_queue(&queue);
-    convertToPolish(&queue, tokens, size);
+    // delta of Angles for rotation
+    deltaA = 0.05;
+    deltaB = 0.05;
+    deltaC = 0.05;
 
-    free(tokens);
+    tokenQueue queue = init(str);
 
     while (1)
     {
@@ -70,11 +71,6 @@ int main()
                     {
                         calculatePoint(i, j, g, '@', "\033[33m"); // Z fixed
                     }
-                    // calculatePoint(i, j, -g, '#', "\033[32m"); // -Z fixed
-                    // calculatePoint(g, i, j, '%', "\033[33m");  // X fixed
-                    // calculatePoint(-g, i, j, '&', "\033[0m");  // -X fixed
-                    // calculatePoint(i, -g, j, 'O', "\033[34m");  // Y fixed
-                    // calculatePoint(i, g, j, 'H', "\033[35m"); // -Y fixed
                 }
             }
         }
@@ -83,7 +79,7 @@ int main()
         printf("%c[%d;%df", 0x1B, 0, 0);
 
         // Coordinates of X Y Z (Debug)
-        // printf("%0.2f %0.2f %0.2f\n", x, y, z);
+        printf("%0.2f %0.2f %0.2f\n", A, B, C);
 
         // Print all points
         for (k = 0; k < WIDTH * HEIGHT; k++)
@@ -94,8 +90,8 @@ int main()
                 PrevBuffer[k] = buffer[k];
 
                 // Position check
-                int row = k / WIDTH;
-                int col = k % WIDTH;
+                row = k / WIDTH;
+                col = k % WIDTH;
                 // Move 1 forward
                 printf("\033[%d;%dH", row + 1, col + 1);
 
@@ -110,21 +106,23 @@ int main()
                 // Print Char
                 putchar(buffer[k]);
             }
-            // else
-            //     printf(k % WIDTH ? "\033[1C" : "\n"); // Move Cursor 1 time right
         }
         fflush(stdout);
 
-        if (C == 1)
-            C = 0;
-        if (B == 1)
-            B = 0;
-        if (A == 1)
-            A = 0;
+        if (abs(C) >= 100)
+        {
+            deltaC *= -1;
 
-        C += 0.05; // X rotation (roll)
-        B += 0.05; // Y rotation (pitch)
-        A += 0.05; // Z rotation (yaw)
+            system("cls");
+        }
+        if (abs(B) >= 100)
+            deltaB *= -1;
+        if (abs(A) >= 100)
+            deltaA *= -1;
+
+        C += deltaC; // X rotation (roll)
+        B += deltaB; // Y rotation (pitch)
+        A += deltaA; // Z rotation (yaw)
 
         Sleep(10);
     }
@@ -186,7 +184,7 @@ RGB ColorMap(float a)
     int r, g = 0, b = 0;
 
     // Color swap
-    r = (int)shade * 10;
+    r = ((int)shade * 10) + 50;
     if (r > 255)
         r = 255;
     else if (r < 0)

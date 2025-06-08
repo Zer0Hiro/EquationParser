@@ -1,6 +1,5 @@
 #include "parser.h"
 
-
 void printTokens(token* tokens, int size)
 {
     int i = 0;
@@ -234,4 +233,17 @@ double evalPolish(tokenQueue* queue, point p)
     free_stack(&numstack);
     return res;
 
+}
+
+// Initialize parser
+tokenQueue init(char* str)
+{
+    token *tokens;
+    int size = parseRule(str, &tokens);
+    tokenQueue queue;
+    initialize_queue(&queue);
+    convertToPolish(&queue, tokens, size);
+
+    free(tokens);
+    return queue;
 }
