@@ -2,7 +2,7 @@
 
 int main()
 {
-    char* str = "abs((x^0.5 + y^2 + z^2))^(1/2) <= 100";
+    char* str = "x^2 + y^2 <= z^2 & z <= 10 & 0 <= z";
     token* tokens;
     int size = parseRule(str, &tokens);
     printTokens(tokens, size);
@@ -15,7 +15,7 @@ int main()
     printf("\n\n");
     free(tokens);
     
-    point p = {1 , 2 , 0};
+    point p = {1 , 2 , 11};
     double res = evalPolish(&queue, p);
     printf("%g\n", res);
 
@@ -65,6 +65,7 @@ void convertToPolish(tokenQueue* queue, token* tokens, int size)
                     push(&opstack, tokens[i]);
                 }
                 // IF token is ')', pop all operators to the output queue and throw the '('
+                //
                 else if(tokens[i].value.op->symbol == ')')
                 {
                     while(peek(&opstack,&temp) == OK && temp.value.op->symbol != '(')
@@ -138,7 +139,7 @@ int parseRule(char* rule, token** res)
             tokens[index_t].value.num = atof(temp_num);
         }
         //if the char is a single-char operator
-        else if(strchr("+/-*^()=",*rule) != NULL)
+        else if(strchr("+/-*^()=&|",*rule) != NULL)
         {
             tokens[index_t].type = T_OPERATOR;
             tokens[index_t].value.op = getop(*rule);
@@ -168,17 +169,23 @@ int parseRule(char* rule, token** res)
             }
             
         }
-        //if the char is a multi-char operator (CURRENTLY ONLY: abs, max)
+        //if the char is a multi-char operator (CURRENTLY ONLY: abs, max, min)
         else if(strstr(rule, "max") == &(*rule))
         {//TODO THINK OF SOMETHING BETTER
             tokens[index_t].type = T_OPERATOR;
             tokens[index_t].value.op = getop('M');
             rule = rule + 3;
         }
+        else if(strstr(rule, "min") == &(*rule))
+        {
+            tokens[index_t].type = T_OPERATOR;
+            tokens[index_t].value.op = getop('m');
+            rule = rule + 3;
+        }
         else if(strstr(rule, "abs") == &(*rule))
         {
             tokens[index_t].type = T_OPERATOR;
-            tokens[index_t].value.op = getop('|');
+            tokens[index_t].value.op = getop('a');
             rule = rule + 3;
         }
         else
