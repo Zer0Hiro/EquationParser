@@ -92,7 +92,7 @@ void renderObject(int width, int height, char *buffer, RGB *colorbuffer, char* P
             // Position check for jump
             row = k / width;
             col = k % width;
-            // Jump and move 1 forward
+            // Jump to specific point on the screen
             printf("\033[%d;%dH", row + 1, col + 1);
 
             // Color swap
