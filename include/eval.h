@@ -27,9 +27,14 @@ double evalpow(double a, double b);
 double evaldiv(double a, double b);
 double evaleq(double a, double b);
 double evalls(double a, double b);
+double evalgr(double a, double b);
 double evalleq(double a, double b);
+double evalgeq(double a, double b);
 double evalabs(double a, double b);
 double evalmax(double a, double b);
+double evalmin(double a, double b);
+double evaland(double a, double b);
+double evalor(double a, double b);
 
 
 
