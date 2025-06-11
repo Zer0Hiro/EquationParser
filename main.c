@@ -2,14 +2,14 @@
 #include "parser.h"
 
 #define WIDTH 140
-#define HEIGHT 40
+#define HEIGHT 45
 #define SIZE (WIDTH * HEIGHT)
 
 // Size of object
 const float cWidth = 40;
 
 // EQUATION
-char *str = "x^2 + y^2 <= z^2";
+char *str = "1";
 
 // Buffers for output points
 char buffer[SIZE];

@@ -6,7 +6,7 @@ void calculatePoint(int i, int j, int k, char sym, int width, int height, float 
 {
     float x, y, z;    // Point coords
     int xproj, yproj; // projection position
-    int cam = 110;    // distance from camera to object
+    int cam = 70;    // distance from camera to object
     float zdist = 40; // distance from camera to screen
     int screenpos;    // position of a point on the screen
     float ooz;        // z-buffer 1/z
@@ -61,15 +61,25 @@ char map(float a)
 RGB ColorMap(float a)
 {
 
-    float shade = a * 1000;
-    int r, g = 0, b = 0;
+    float shade = a * 10000;
+    int r = 0, g = 0, b = 0, mod;
 
+    mod = (int)shade %10;
     // Color swap
-    r = ((int)shade * 10) + 50;
+    r = ((int)shade + mod*10);
+    g = b = r;
     if (r > 255)
+    {
         r = 255;
+        g = 255;
+        b = 255;
+    }
     else if (r < 0)
-        r = 0;
+    {
+       r = 0;
+       g = 0;
+       b = 0;
+    }
 
     return (RGB){r, g, b};
 }
