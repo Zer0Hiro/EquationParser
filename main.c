@@ -9,7 +9,7 @@
 const float cWidth = 40;
 
 // EQUATION
-char *str = "1";
+char *str = "((x^2+y^2)^0.5 - 15)^2 + z^2 < 15";
 
 // Buffers for output points
 char buffer[SIZE];
@@ -19,7 +19,6 @@ float zbuffer[SIZE];
 RGB colorbuffer[SIZE];
 // Prev buffer
 char PrevBuffer[SIZE];
-
 
 float A, B, C; // Angles
 int background = ' ';
@@ -47,6 +46,8 @@ int main()
         memset(buffer, background, sizeof(buffer));
         memset(zbuffer, 0, sizeof(zbuffer));
 
+        Angles ang = {sin(A), sin(B), sin(C), cos(A), cos(B), cos(C)};
+        
         for (i = -cWidth / 2; i < cWidth / 2; i += 1)
         {
             for (j = -cWidth / 2; j < cWidth / 2; j += 1)
@@ -56,7 +57,7 @@ int main()
                     point p = {i, j, g};
                     if (evalPolish(&queue, p))
                     {
-                        calculatePoint(i, j, g, '@', WIDTH, HEIGHT, zbuffer, buffer, colorbuffer, A, B, C);
+                        calculatePoint(i, j, g, WIDTH, HEIGHT, zbuffer, buffer, colorbuffer, &ang);
                     }
                 }
             }

@@ -2,7 +2,7 @@
 #define N 
 
 // Calculate position of the point
-void calculatePoint(int i, int j, int k, char sym, int width, int height, float *zbuffer, char *buffer, RGB *colorbuffer, float A, float B, float C)
+void calculatePoint(int i, int j, int k, int width, int height, float *zbuffer, char *buffer, RGB *colorbuffer, Angles* angle)
 {
     float x, y, z;    // Point coords
     int xproj, yproj; // projection position
@@ -11,24 +11,24 @@ void calculatePoint(int i, int j, int k, char sym, int width, int height, float 
     int screenpos;    // position of a point on the screen
     float ooz;        // z-buffer 1/z
 
-    // Sines and Cosines
-    float sinA = sin(A), cosA = cos(A); // X-axis rotation
-    float sinB = sin(B), cosB = cos(B); // Y-axis rotation
-    float sinC = sin(C), cosC = cos(C); // Z-axis rotation
+    // // Sines and Cosines
+    // float sinA = sin(A), cosA = cos(A); // X-axis rotation
+    // float sinB = sin(B), cosB = cos(B); // Y-axis rotation
+    // float sinC = sin(C), cosC = cos(C); // Z-axis rotation
 
     // Rotate around Z
     float x1 = i;
-    float y1 = j * cosA - k * sinA;
-    float z1 = j * sinA + k * cosA;
+    float y1 = j * angle->cosA - k * angle->sinA;
+    float z1 = j * angle->sinA + k * angle->cosA;
 
     // Rotate around Y
-    float x2 = x1 * cosB + z1 * sinB;
+    float x2 = x1 * angle->cosB + z1 * angle->sinB;
     float y2 = y1;
-    float z2 = -x1 * sinB + z1 * cosB;
+    float z2 = -x1 * angle->sinB + z1 * angle->cosB;
 
     // Rotate around X
-    float x3 = x2 * cosC - y2 * sinC;
-    float y3 = x2 * sinC + y2 * cosC;
+    float x3 = x2 * angle->cosC - y2 * angle->sinC;
+    float y3 = x2 * angle->sinC + y2 * angle->cosC;
     float z3 = z2;
 
     x = x3;
