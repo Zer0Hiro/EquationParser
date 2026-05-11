@@ -4,6 +4,8 @@ Type an equation. See a 3D shape.
 
 EquationParser takes a math string like `((x^2+y^2)^0.5 - 15)^2 + z^2 < 15` and renders the implicit 3D surface it describes — no mesh, no model, just an inequality over `x`, `y`, `z` evaluated at every point in space.
 
+![demo](assets/demo.gif)
+
 ---
 
 ## What it does
