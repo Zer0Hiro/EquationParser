@@ -1,5 +1,5 @@
-#include "renderer.h"
 #include "parser.h"
+#include "renderer.h"
 
 #define WIDTH 140
 #define HEIGHT 45
@@ -9,7 +9,7 @@
 const float cWidth = 40;
 
 // EQUATION
-char *str = "((x^2+y^2)^0.5 - 15)^2 + z^2 < 15";
+char* str = "x^4 - 5*x^2 + y^4 - 5*y^2 + z^4 - 5*z^2 + 11.8 < 0";
 
 // Buffers for output points
 char buffer[SIZE];
@@ -20,15 +20,15 @@ RGB colorbuffer[SIZE];
 // Prev buffer
 char PrevBuffer[SIZE];
 
-float A, B, C; // Angles
+float A, B, C;  // Angles
 int background = ' ';
-float deltaA, deltaB, deltaC; // delta of Angle
+float deltaA, deltaB, deltaC;  // delta of Angle
 
 int main()
 {
     float i, j, g;
 
-    system("cls");
+    CLEAR_SCREEN();
 
     // delta of Angles for rotation
     deltaA = 0.09;
@@ -39,7 +39,7 @@ int main()
 
     // Start
     printf("The program will start in 5sec, open console on FULL SCREEN");
-    Sleep(5000);
+    SLEEP(5000);
 
     while (1)
     {
@@ -47,7 +47,7 @@ int main()
         memset(zbuffer, 0, sizeof(zbuffer));
 
         Angles ang = {sin(A), sin(B), sin(C), cos(A), cos(B), cos(C)};
-        
+
         for (i = -cWidth / 2; i < cWidth / 2; i += 1)
         {
             for (j = -cWidth / 2; j < cWidth / 2; j += 1)
@@ -57,7 +57,8 @@ int main()
                     point p = {i, j, g};
                     if (evalPolish(&queue, p))
                     {
-                        calculatePoint(i, j, g, WIDTH, HEIGHT, zbuffer, buffer, colorbuffer, &ang);
+                        calculatePoint(i, j, g, WIDTH, HEIGHT, zbuffer, buffer,
+                                       colorbuffer, &ang);
                     }
                 }
             }
@@ -77,15 +78,13 @@ int main()
         {
             deltaC *= -1;
         }
-        if (abs(B) >= 100)
-            deltaB *= -1;
-        if (abs(A) >= 100)
-            deltaA *= -1;
+        if (abs(B) >= 100) deltaB *= -1;
+        if (abs(A) >= 100) deltaA *= -1;
 
-        C += deltaC; // X rotation (roll)
-        B += deltaB; // Y rotation (pitch)
-        A += deltaA; // Z rotation (yaw)
+        C += deltaC;  // X rotation (roll)
+        B += deltaB;  // Y rotation (pitch)
+        A += deltaA;  // Z rotation (yaw)
 
-        Sleep(10);
+        SLEEP(10);
     }
 }

@@ -7,8 +7,19 @@
 #include<stdlib.h>
 #include<math.h>
 #include<string.h>
-#include<windows.h>
 #include<time.h>
+
+// Cross-platform sleep and clear screen
+#ifdef _WIN32
+    #include<windows.h>
+    #define SLEEP(ms) Sleep(ms)
+    #define CLEAR_SCREEN() system("cls")
+#else
+    #include<unistd.h>
+    #define SLEEP(ms) usleep((ms) * 1000)
+    #define CLEAR_SCREEN() system("clear")
+#endif
+
 #include "stack.h"
 #include "eval.h"
 

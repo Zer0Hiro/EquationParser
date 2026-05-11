@@ -1,15 +1,13 @@
 #ifndef _STACK_H
 #define _STACK_H
-#include<stdio.h>
-#include<conio.h>
-#include<stdlib.h>
 #include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "eval.h"
 
-
-
-
-typedef enum {
+typedef enum
+{
     T_NUMBER,
     T_OPERATOR,
     T_VARIABLE,
@@ -19,47 +17,49 @@ typedef struct token
 {
     union value
     {
-        double num; //T_NUMBER
-        operator* op; //T_OPERATOR
-        char var; //T_VARIABLE
-    }value;
+        double num;    // T_NUMBER
+        operator* op;  // T_OPERATOR
+        char var;      // T_VARIABLE
+    } value;
     T_TYPE type;
-    
-}token;
+
+} token;
 
 typedef struct tokenNode
 {
     token _token;
     struct tokenNode* next;
-}tokenNode;
+} tokenNode;
 
-typedef enum {NOT_OK, OK} Tboolean;
+typedef enum
+{
+    NOT_OK,
+    OK
+} Tboolean;
 
-typedef struct 
-{   
-    tokenNode *tokenTop;
+typedef struct
+{
+    tokenNode* tokenTop;
     int top;
-}tokenStack;
+} tokenStack;
 
 typedef struct tokenQueue
 {
     tokenNode *head, *tail;
     int size;
-}tokenQueue;
-
+} tokenQueue;
 
 void initialize_queue(tokenQueue*);
-void enqueue(tokenQueue*,token token);
-Tboolean dequeue(tokenQueue* queue,token *token);
+void enqueue(tokenQueue*, token token);
+Tboolean dequeue(tokenQueue* queue, token* token);
 void print_queue(tokenQueue* queue);
 void free_queue(tokenQueue* queue);
-int convert_to_array(token* tokens,tokenQueue* queue);
+int convert_to_array(token* tokens, tokenQueue* queue);
 
-void initialize_stack (tokenStack *Pstack);
-void push (tokenStack *Pstack, token item);
-Tboolean pop (tokenStack *Pstack, token *Pitem);
-Tboolean peek(tokenStack *PStack, token* token);
-void free_stack (tokenStack *Pstack);
-
+void initialize_stack(tokenStack* Pstack);
+void push(tokenStack* Pstack, token item);
+Tboolean pop(tokenStack* Pstack, token* Pitem);
+Tboolean peek(tokenStack* PStack, token* token);
+void free_stack(tokenStack* Pstack);
 
 #endif

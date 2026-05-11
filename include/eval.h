@@ -1,15 +1,18 @@
 #ifndef _EVAL
 #define _EVAL
-#include<stdio.h>
-#include<conio.h>
-#include<stdlib.h>
-#include<math.h>
 #include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "stack.h"
 
-
-typedef enum {LEFT, RIGHT, NONE} ASSOC;
-
+typedef enum
+{
+    LEFT,
+    RIGHT,
+    NONE
+} ASSOC;
 
 typedef struct op
 {
@@ -18,7 +21,7 @@ typedef struct op
     ASSOC assoc;
     char isUnary;
     double (*evalfunc)(double, double);
-}operator;
+} operator;
 
 double evalplus(double a, double b);
 double evalminus(double a, double b);
@@ -35,10 +38,6 @@ double evalmax(double a, double b);
 double evalmin(double a, double b);
 double evaland(double a, double b);
 double evalor(double a, double b);
-
-
-
-
 
 operator* getop(char c);
 
